@@ -153,7 +153,7 @@ class lista(object):
 
 class busca(object):
     
-    def custo_uniforme(self, grafo, nos, inicio, fim):
+    def custo_uniforme(self, grafo, inicio, fim):
         
         l1 = lista()
         l2 = lista()
@@ -315,53 +315,8 @@ class busca(object):
                         linha.append(v2)
                         visitado.append(linha)
                     
-        return "Caminho não encontrado"      
-    
+        return "Caminho não encontrado"
 
-
-nos = ["ARAD", "BUCARESTE", "CRAIOVA", "DOBRETA", "EFORIE", 
-       "FAGARAS", "GIURGIU", "HIRSOVA", "IASI", "LUGOJ",
-       "MEHADIA", "NEAMT", "ORADEA","PITESTI", 
-       "RIMINCU VILCEA", "SIBIU", "TIMISOARA", 
-       "URZICENI", "VASLUI","ZERIND"]
-
-grafo = [
-            [["ZERIND",75], ["TIMISOARA",118], ["SIBIU",140]],
-            [["URZICENI",85], ["PITESTI",101], ["GIURGIU",90], ["FAGARAS",211]], 
-            [["RIMINCU VILCEA",146], ["PITESTI",138], ["DOBRETA",120]], 
-            [["MEHADIA",75], ["CRAIOVA",120]], 
-            [["HIRSOVA",86]],
-            [["SIBIU",99], ["BUCARESTE",211]], 
-            [["BUCARESTE",90]], 
-            [["URZICENI",98], ["EFORIE",86]], 
-            [["VASLUI",92], ["NEAMT",87]],
-            [["TIMISOARA",111],["MEHADIA",70]], 
-            [["LUGOJ",70], ["DOBRETA",75]], 
-            [["IASI",87]], 
-            [["ZERIND",71], ["SIBIU",151]],
-            [["RIMINCU VILCEA",97], ["CRAIOVA",138], ["BUCARESTE",101]], 
-            [["SIBIU",80], ["PITESTI",97], ["CRAIOVA",146]], 
-            [["RIMINCU VILCEA",80], ["ORADEA",151], ["FAGARAS",99], ["ARAD",140]], 
-            [["LUGOJ",111], ["ARAD",118]],
-            [["VASLUI",142], ["HIRSOVA",98], ["BUCARESTE",85]], 
-            [["URZICENI",142], ["IASI",92]], 
-            [["ORADEA",71], ["ARAD",75]]
-        ]
 
 # HEURISTICA SERVE SOMENTE PARA DESTINO BUCARESTE
 h = [366,0,160,242,161,178,77,151,226,244,241,234,380,98,193,253,329,80,199,374]
-
-
-# sol = busca()
-# caminho = []
-
-# caminho, custo = sol.custo_uniforme("ARAD","BUCARESTE")
-# print("Custo Uniforme: ",caminho[::-1],"\nCusto do Caminho: ",custo)
-
-
-# caminho, custo = sol.greedy("ARAD","BUCARESTE")
-# print("\nGreedy: ",caminho[::-1],"\ncusto do caminho: ",custo)
-
-
-# caminho, custo = sol.a_estrela("ARAD","BUCARESTE")
-# print("\nA estrela: ",caminho[::-1],"\ncusto do caminho: ",custo)

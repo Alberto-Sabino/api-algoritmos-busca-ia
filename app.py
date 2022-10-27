@@ -16,14 +16,13 @@ sp = semPeso.busca()
 def buscaPorAmplitude():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
         origem = request.get_json()['origem']
         destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
-        caminho = sp.amplitude(grafo, nos, origem, destino)
+        caminho = sp.amplitude(grafo, origem, destino)
     except:
         return erroInterno()
 
@@ -34,19 +33,18 @@ def buscaPorAmplitude():
 def buscaPorProfundidade():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
         origem = request.get_json()['origem']
         destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
-    try:
-        if request.args.get('limite', None) != None:
-            caminho = sp.prof_limitada(grafo, nos, origem, destino, int(request.args.get('limite')))
-        else:
-            caminho = sp.profundidade(grafo, nos, origem, destino)
-    except:
-        return erroInterno()
+    # try:
+    if request.args.get('limite', None) != None:
+        caminho = sp.prof_limitada(grafo, origem, destino, int(request.args.get('limite')))
+    else:
+        caminho = sp.profundidade(grafo, origem, destino)
+    # except:
+    #     return erroInterno()
 
     return caminho
 
@@ -54,7 +52,6 @@ def buscaPorProfundidade():
 def buscaPorAprofundamento():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
         origem = request.get_json()['origem']
         limite = request.get_json()['limite']
         destino = request.get_json()['destino']
@@ -62,7 +59,7 @@ def buscaPorAprofundamento():
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
-        caminho = sp.aprof_iterativo(grafo, nos, origem, destino, limite)
+        caminho = sp.aprof_iterativo(grafo, origem, destino, limite)
     except:
         return erroInterno()
     
@@ -73,16 +70,15 @@ def buscaPorAprofundamento():
 def buscaBidirecional():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
         origem = request.get_json()['origem']
         destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
-    try:
-        caminho = sp.bidirecional(grafo, nos, origem, destino)
-    except:
-        return erroInterno()
+    # try:
+    caminho = sp.bidirecional(grafo, origem, destino)
+    # except:
+    #     return erroInterno()
 
     return caminho
 
