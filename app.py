@@ -1,6 +1,6 @@
 from http.client import HTTPException
 import os
-from algoritmos import comPeso, semPeso, helpers
+from algoritmos import comPeso, semPeso
 from flask import Flask, request, json, abort, make_response
 from werkzeug.exceptions import HTTPException
 
@@ -23,6 +23,7 @@ def buscaPorAmplitude():
         origem, destino = identificarViagem(grafo)
         caminho = sp.amplitude(grafo, origem, destino)
         retorno = []
+
         if caminho != 'caminho não encontrado':
             for ponto in caminho:
                 retorno.append(grafo[ponto[0]][ponto[1]])
@@ -32,7 +33,6 @@ def buscaPorAmplitude():
             return caminho
     except:
         return erroInterno()
-
 
 
 @app.post("/api/profundidade")
@@ -48,10 +48,19 @@ def buscaPorProfundidade():
             caminho = sp.prof_limitada(grafo, origem, destino, int(request.args.get('limite')))
         else:
             caminho = sp.profundidade(grafo, origem, destino)
+
+        retorno = []
+
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
+
+            return retorno
+        else:
+            return caminho
     except:
         return erroInterno()
 
-    return caminho
 
 @app.post("/api/aprofundamento-interativo")
 def buscaPorAprofundamento():
@@ -64,10 +73,17 @@ def buscaPorAprofundamento():
     try:
         origem, destino = identificarViagem(grafo)
         caminho = sp.aprof_iterativo(grafo, origem, destino, limite)
+        retorno = []
+
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
+
+            return retorno
+        else:
+            return caminho
     except:
         return erroInterno()
-    
-    return caminho
 
 
 @app.post("/api/bidirecional")
@@ -80,11 +96,17 @@ def buscaBidirecional():
     try:
         origem, destino = identificarViagem(grafo)
         caminho = sp.bidirecional(grafo, origem, destino)
+        retorno = []
+
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
+
+            return retorno
+        else:
+            return caminho
     except:
         return erroInterno()
-
-    return caminho
-
 
 # -------------------------------- Busca com peso --------------------------------
 
@@ -99,13 +121,20 @@ def buscaPorCustoUniforme():
         origem, destino = identificarViagem(grafo)
         caminho, custo = cp.custo_uniforme(grafo, origem, destino)
 
-        response = make_response(json.dumps({ 
-                        "caminho": caminho,
-                        "custo": custo
-                    }), 200)
-        response.content_type = "application/json"
+        retorno = []
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
 
-        return response
+            response = make_response(json.dumps({
+                            "caminho": retorno,
+                            "custo": custo
+                        }), 200)
+            response.content_type = "application/json"
+
+            return response
+        else:
+            return caminho
     except:
         return erroInterno()
 
@@ -120,13 +149,21 @@ def buscaPorGreedy():
     try:
         origem, destino = identificarViagem(grafo)
         caminho, custo = cp.greedy(grafo, origem, destino)
-        response = make_response(json.dumps({ 
-                        "caminho": caminho,
-                        "custo": custo
-                    }), 200)
-        response.content_type = "application/json"
 
-        return response
+        retorno = []
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
+
+            response = make_response(json.dumps({
+                            "caminho": retorno,
+                            "custo": custo
+                        }), 200)
+            response.content_type = "application/json"
+
+            return response
+        else:
+            return caminho
     except:
         return erroInterno()
 
@@ -141,13 +178,20 @@ def buscaPorAEstrela():
     try:
         origem, destino = identificarViagem(grafo)
         caminho, custo = cp.a_estrela(grafo, origem, destino)
-        response = make_response(json.dumps({ 
-                        "caminho": caminho,
-                        "custo": custo
-                    }), 200)
-        response.content_type = "application/json"
+        retorno = []
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
 
-        return response
+            response = make_response(json.dumps({
+                            "caminho": retorno,
+                            "custo": custo
+                        }), 200)
+            response.content_type = "application/json"
+
+            return response
+        else:
+            return caminho
     except:
         return erroInterno()
 
@@ -176,18 +220,9 @@ def erroInterno():
     response.content_type = "application/json"
     return response
 
-
 # -------------------------------- Iniciando servidor --------------------------------
 
-if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    debug = bool(os.environ.get('DEBUG', "False"))
-    app.run(debug=debug, port=port, host='0.0.0.0' )
-
-
-# -------------------------------- Helpers --------------------------------
-
-def identificarViagem (grafo):
+def identificarViagem(grafo):
     x = 0
     y = 0
     origem = []
@@ -198,7 +233,15 @@ def identificarViagem (grafo):
         for objeto in linha:
             y+=1
             if 'origem' in objeto:
-                origem = [x, y]
+                origem = [x-1, y-1]
             elif 'destino' in objeto:
-                destino = [x, y]
+                destino = [x-1, y-1]
+        y = 0
     return origem, destino
+
+# -------------------------------- Iniciando servidor --------------------------------
+
+if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 5000))
+    debug = bool(os.environ.get('DEBUG', "False"))
+    app.run(debug=debug, port=port, host='0.0.0.0' )
