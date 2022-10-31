@@ -115,6 +115,7 @@ class lista(object):
             caminho.append(atual.estado)
         return caminho
 
+
 class busca(object):
     # BUSCA EM AMPLITUDE
     def amplitude(self, grafo, inicio, fim):
@@ -139,7 +140,7 @@ class busca(object):
         while l1.vazio() is not None:
             # remove o primeiro da fila
             atual = l1.deletaPrimeiro()
-            # if atual is None: break
+            if atual is None: break
 
             vizinhos = self.sucessor(grafo, atual.estado[0], atual.estado[1])
 
@@ -493,31 +494,32 @@ class busca(object):
 
         return "caminho não encontrado"
 
+
     def sucessor(self, grafo, x, y):
         vizinhanca = []
 
-        # vizinho da direita
-        if x < len(grafo):
+        # vizinho de baixo
+        if x < len(grafo[0]):
             vizinho = []
             vizinho.append(x+1)
             vizinho.append(y)
             vizinhanca.append(vizinho)
 
-        # vizinho da esquerda
+        # vizinho da vizinho de cima
         if x > 0:
             vizinho = []
             vizinho.append(x-1)
             vizinho.append(y)
             vizinhanca.append(vizinho)
 
-        # vizinho de cima
+        # vizinho da direita
         if y < len(grafo[0]):
             vizinho = []
             vizinho.append(x)
             vizinho.append(y+1)
             vizinhanca.append(vizinho)
 
-        # vizinho de baixo
+        # vizinho da esquerda
         if y > 0:
             vizinho = []
             vizinho.append(x)

@@ -1,6 +1,6 @@
 from http.client import HTTPException
 import os
-from algoritmos import comPeso, semPeso
+from algoritmos import comPeso, semPeso, helpers
 from flask import Flask, request, json, abort, make_response
 from werkzeug.exceptions import HTTPException
 
@@ -16,35 +16,40 @@ sp = semPeso.busca()
 def buscaPorAmplitude():
     try:
         grafo = request.get_json()['grafo']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
+        origem, destino = identificarViagem(grafo)
         caminho = sp.amplitude(grafo, origem, destino)
+        retorno = []
+        if caminho != 'caminho não encontrado':
+            for ponto in caminho:
+                retorno.append(grafo[ponto[0]][ponto[1]])
+
+            return retorno
+        else:
+            return caminho
     except:
         return erroInterno()
 
-    return caminho
 
 
 @app.post("/api/profundidade")
 def buscaPorProfundidade():
     try:
         grafo = request.get_json()['grafo']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
-    # try:
-    if request.args.get('limite', None) != None:
-        caminho = sp.prof_limitada(grafo, origem, destino, int(request.args.get('limite')))
-    else:
-        caminho = sp.profundidade(grafo, origem, destino)
-    # except:
-    #     return erroInterno()
+    try:
+        origem, destino = identificarViagem(grafo)
+        if request.args.get('limite', None) != None:
+            caminho = sp.prof_limitada(grafo, origem, destino, int(request.args.get('limite')))
+        else:
+            caminho = sp.profundidade(grafo, origem, destino)
+    except:
+        return erroInterno()
 
     return caminho
 
@@ -52,13 +57,12 @@ def buscaPorProfundidade():
 def buscaPorAprofundamento():
     try:
         grafo = request.get_json()['grafo']
-        origem = request.get_json()['origem']
         limite = request.get_json()['limite']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
+        origem, destino = identificarViagem(grafo)
         caminho = sp.aprof_iterativo(grafo, origem, destino, limite)
     except:
         return erroInterno()
@@ -70,15 +74,14 @@ def buscaPorAprofundamento():
 def buscaBidirecional():
     try:
         grafo = request.get_json()['grafo']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
-    # try:
-    caminho = sp.bidirecional(grafo, origem, destino)
-    # except:
-    #     return erroInterno()
+    try:
+        origem, destino = identificarViagem(grafo)
+        caminho = sp.bidirecional(grafo, origem, destino)
+    except:
+        return erroInterno()
 
     return caminho
 
@@ -89,14 +92,13 @@ def buscaBidirecional():
 def buscaPorCustoUniforme():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
-        caminho, custo = cp.custo_uniforme(grafo, nos, origem, destino)
+        origem, destino = identificarViagem(grafo)
+        caminho, custo = cp.custo_uniforme(grafo, origem, destino)
+
         response = make_response(json.dumps({ 
                         "caminho": caminho,
                         "custo": custo
@@ -112,14 +114,12 @@ def buscaPorCustoUniforme():
 def buscaPorGreedy():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
-        caminho, custo = cp.greedy(grafo, nos, origem, destino)
+        origem, destino = identificarViagem(grafo)
+        caminho, custo = cp.greedy(grafo, origem, destino)
         response = make_response(json.dumps({ 
                         "caminho": caminho,
                         "custo": custo
@@ -129,22 +129,18 @@ def buscaPorGreedy():
         return response
     except:
         return erroInterno()
-
-    return caminho
 
 
 @app.post("/api/a-estrela")
 def buscaPorAEstrela():
     try:
         grafo = request.get_json()['grafo']
-        nos = request.get_json()['nos']
-        origem = request.get_json()['origem']
-        destino = request.get_json()['destino']
     except:
         abort(400, 'As informações passadas no body da request estão incompletas.')
 
     try:
-        caminho, custo = cp.a_estrela(grafo, nos, origem, destino)
+        origem, destino = identificarViagem(grafo)
+        caminho, custo = cp.a_estrela(grafo, origem, destino)
         response = make_response(json.dumps({ 
                         "caminho": caminho,
                         "custo": custo
@@ -154,8 +150,6 @@ def buscaPorAEstrela():
         return response
     except:
         return erroInterno()
-
-    return caminho
 
 
 # ----------------------------- Tratamento de erros ------------------------------
@@ -189,3 +183,22 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     debug = bool(os.environ.get('DEBUG', "False"))
     app.run(debug=debug, port=port, host='0.0.0.0' )
+
+
+# -------------------------------- Helpers --------------------------------
+
+def identificarViagem (grafo):
+    x = 0
+    y = 0
+    origem = []
+    destino = []
+
+    for linha in grafo:
+        x+=1
+        for objeto in linha:
+            y+=1
+            if 'origem' in objeto:
+                origem = [x, y]
+            elif 'destino' in objeto:
+                destino = [x, y]
+    return origem, destino

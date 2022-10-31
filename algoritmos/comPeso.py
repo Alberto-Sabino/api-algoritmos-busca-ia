@@ -1,12 +1,12 @@
 class No(object):
-    def __init__(self, pai=None, estado=None, valor1=None, valor2=None, anterior=None, proximo=None):
+    def __init__(self, pai=None, estado=None, valor1=None, custo=None, anterior=None, proximo=None):
         self.pai       = pai
         self.estado    = estado
         self.valor1    = valor1        # valor do nó na árvore
-        self.valor2    = valor2        # custo do caminho até o nó atual
+        self.custo    = custo        # custo do caminho até o nó atual
         self.anterior  = anterior
         self.proximo   = proximo
-    
+
 class lista(object):
     head = None
     tail = None
@@ -154,57 +154,66 @@ class lista(object):
 class busca(object):
     
     def custo_uniforme(self, grafo, inicio, fim):
-        
+
+        # manipular a FILA para a busca
         l1 = lista()
+
+        # cópia para apresentar o caminho (somente inserção)
         l2 = lista()
+
+        # insere ponto inicial como nó raiz da árvore
+        l1.insereUltimo(inicio, 0, None)
+        l2.insereUltimo(inicio, 0, None)
+
+        # controle de nós visitados
         visitado = []
-        
-        l1.insereUltimo(inicio,0,0,None)
-        l2.insereUltimo(inicio,0,0,None)
         linha = []
         linha.append(inicio)
         linha.append(0)
         visitado.append(linha)
-        
-        while l1.vazio() == False:
+
+        while l1.vazio() is not None:
+            # remove o primeiro da fila
             atual = l1.deletaPrimeiro()
-            
-            if atual.estado == fim:
-                caminho = []
-                caminho = l2.exibeArvore2(atual.estado,atual.valor1)
-                #print("Cópia da árvore:\n",l2.exibeLista())
-                #print("\nÁrvore de busca:\n",l1.exibeLista(),"\n")
+            # if atual is None: break
 
-                return caminho, atual.valor2
-        
-            ind = nos.index(atual.estado)
-            for novo in grafo[ind]:
-                
-                # CÁLCULO DO CUSTO DA ORIGEM ATÉ O NÓ ATUAL
-                v2 = atual.valor2 + novo[1]  # custo do caminho
-                v1 = v2 # f1(n)
+            vizinhos = self.sucessor(grafo, atual.estado[0], atual.estado[1])
 
-                flag1 = True
-                flag2 = True
+            # varre todos as conexões dentro do grafo a partir de atual
+            for v in vizinhos:
+                novo = v
+                naoVisitado = True  # pressuponho que não foi visitado
+
+                # controle de nós repetidos
                 for j in range(len(visitado)):
-                    if visitado[j][0]==novo[0]:
-                        if visitado[j][1]<=v2:
-                            flag1 = False
+                    if visitado[j][0] == novo:
+                        if visitado[j][1] <= (atual.nivel+1):
+                            naoVisitado = False
                         else:
-                            visitado[j][1]=v2
-                            flag2 = False
+                            visitado[j][1] = atual.nivel+1
                         break
 
-                if flag1:
-                    l1.inserePos_X(novo[0], v1 , v2, atual)
-                    l2.inserePos_X(novo[0], v1, v2, atual)
-                    if flag2:
-                        linha = []
-                        linha.append(novo[0])
-                        linha.append(v2)
-                        visitado.append(linha)
-                    
-        return "Caminho não encontrado"      
+                # se não foi visitado inclui na fila
+                if naoVisitado:
+                    l1.insereUltimo(novo, atual.nivel + 1, atual)
+                    l2.insereUltimo(novo, atual.nivel + 1, atual)
+
+                    # marca como visitado
+                    linha = []
+                    linha.append(novo)
+                    linha.append(atual.nivel+1)
+                    visitado.append(linha)
+
+                    # verifica se é o objetivo
+                    if novo == fim:
+                        caminho = []
+                        caminho += l2.exibeCaminho()
+                        # print("Fila:\n",l1.exibeLista())
+                        #print("\nÁrvore de busca:\n",l2.exibeLista())
+                        return caminho
+
+        return "caminho não encontrado"
+
     
     def greedy(self, grafo, nos, inicio, fim):
         
@@ -228,7 +237,7 @@ class busca(object):
                 #print("Cópia da árvore:\n",l2.exibeLista())
                 #print("\nÁrvore de busca:\n",l1.exibeLista(),"\n")
 
-                return caminho, atual.valor2
+                return caminho, atual.custo
         
             ind = nos.index(atual.estado)
             for novo in grafo[ind]:
@@ -236,7 +245,7 @@ class busca(object):
                 ind1 = nos.index(novo[0])
                 
                 # CÁLCULO DO CUSTO DA ORIGEM ATÉ O NÓ ATUAL
-                v2 = atual.valor2 + novo[1]  # custo do caminho
+                v2 = atual.custo + novo[1]  # custo do caminho
                 v1 = h[ind1] # f2(n)
 
                 flag1 = True
@@ -279,12 +288,9 @@ class busca(object):
             atual = l1.deletaPrimeiro()
             
             if atual.estado == fim:
-                caminho = []
                 caminho = l2.exibeArvore2(atual.estado,atual.valor1)
-                #print("Cópia da árvore:\n",l2.exibeLista())
-                #print("\nÁrvore de busca:\n",l1.exibeLista(),"\n")
 
-                return caminho, atual.valor2
+                return caminho, atual.custo
         
             ind = nos.index(atual.estado)
             for novo in grafo[ind]:
@@ -292,7 +298,7 @@ class busca(object):
                 ind1 = nos.index(novo[0])
                 
                 # CÁLCULO DO CUSTO DA ORIGEM ATÉ O NÓ ATUAL
-                v2 = atual.valor2 + novo[1]  # custo do caminho
+                v2 = atual.custo + novo[1]  # custo do caminho
                 v1 = v2 + h[ind1] # f2(n)
 
                 flag1 = True
@@ -318,5 +324,40 @@ class busca(object):
         return "Caminho não encontrado"
 
 
-# HEURISTICA SERVE SOMENTE PARA DESTINO BUCARESTE
-h = [366,0,160,242,161,178,77,151,226,244,241,234,380,98,193,253,329,80,199,374]
+    def sucessor(self, grafo, x, y):
+        vizinhanca = []
+
+        # vizinho da direita
+        if x < len(grafo):
+            vizinho = []
+            vizinho.append(x+1)
+            vizinho.append(y)
+            vizinho.append(grafo[x+1, y])
+            vizinhanca.append(vizinho)
+
+        # vizinho da esquerda
+        if x > 0:
+            vizinho = []
+            vizinho.append(x-1)
+            vizinho.append(y)
+            vizinho.append(grafo[x-1, y])
+            vizinhanca.append(vizinho)
+
+        # vizinho de cima
+        if y < len(grafo[0]):
+            vizinho = []
+            vizinho.append(x)
+            vizinho.append(y+1)
+            vizinho.append(grafo[x, y+1])
+            vizinhanca.append(vizinho)
+
+        # vizinho de baixo
+        if y > 0:
+            vizinho = []
+            vizinho.append(x)
+            vizinho.append(y-1)
+            vizinho.append(grafo[x, y-1])
+            vizinhanca.append(vizinho)
+
+        return vizinhanca
+
