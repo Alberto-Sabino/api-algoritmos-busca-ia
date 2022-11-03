@@ -157,7 +157,7 @@ def buscaPorGreedy():
 
             response = make_response(json.dumps({
                             "caminho": retorno,
-                            "custo": custo
+                            "custo_heuristica": custo
                         }), 200)
             response.content_type = "application/json"
 
@@ -232,9 +232,9 @@ def identificarViagem(grafo):
         x+=1
         for objeto in linha:
             y+=1
-            if 'origem' in objeto:
+            if objeto['origem']:
                 origem = [x-1, y-1]
-            elif 'destino' in objeto:
+            elif objeto['destino']:
                 destino = [x-1, y-1]
         y = 0
     return origem, destino
